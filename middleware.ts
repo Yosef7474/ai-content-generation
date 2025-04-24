@@ -13,8 +13,11 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - signup (signup page)
+     * - home page (/)
+     * - image files (svg, png, jpg, jpeg, gif, webp)
      * Feel free to modify this pattern to include more paths.
      */
-    '/((?!_next/static|_next/image|favicon.ico|signup|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|signup|/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
