@@ -4,9 +4,11 @@ import React, { useEffect, useState, useRef } from 'react'
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Power3 } from 'gsap';
+import Link from 'next/link';
 
-// Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger);
+
+const CACHE_EXPIRY = 60 * 1000; // 60 seconds
 
 const Dashboard = () => {
     const [userName, setUserName] = useState<string | null>(null);
@@ -14,41 +16,62 @@ const Dashboard = () => {
     const dashboardRef = useRef<HTMLDivElement>(null);
     const cardsRef = useRef<HTMLDivElement[]>([]);
     const headerRef = useRef<HTMLHeadingElement>(null);
-    
-    // GSAP animations
-  
-
-    
-
-    const getUserId = async () => {
-        const { data: userid } = await createClient().auth.getUser();
-        const { data: user } = await createClient()
-            .from('users')
-            .select('name')
-            .eq('id', `${userid.user?.id}`);
-
-        if (!user || user.length === 0) {
-            console.error("Error fetching user ID");
-            return;
-        }
-
-        setUserName(user[0]?.name);
-
-        const { data } = await createClient()
-            .from('generations')
-            .select('*')
-            .eq('user_id', `${userid.user?.id}`)
-            .order('created_at', { ascending: false })
-            .limit(5);
-
-        setRecentGenerations(data || []);
-    }
-
-    console.log(recentGenerations)
 
     useEffect(() => {
+        const getUserId = async () => {
+            const client = createClient();
+            const { data: userData } = await client.auth.getUser();
+
+            const userId = userData?.user?.id;
+            if (!userId) return;
+
+            // --- Caching logic ---
+            const cacheKey = `dashboard_data_${userId}`;
+            const cached = localStorage.getItem(cacheKey);
+            const now = Date.now();
+
+            if (cached) {
+                const parsed = JSON.parse(cached);
+                if (now - parsed.timestamp < CACHE_EXPIRY) {
+                    setUserName(parsed.userName);
+                    setRecentGenerations(parsed.generations);
+                    return;
+                }
+            }
+
+            // Fetch fresh from Supabase
+            const { data: user } = await client
+                .from('users')
+                .select('name')
+                .eq('id', userId);
+
+            if (!user || user.length === 0) return;
+
+            setUserName(user[0]?.name);
+
+            const { data: generations } = await client
+                .from('generations')
+                .select('*')
+                .eq('user_id', userId)
+                .order('created_at', { ascending: false })
+                .limit(5);
+
+            setRecentGenerations(generations || []);
+
+            localStorage.setItem(
+                cacheKey,
+                JSON.stringify({
+                    timestamp: now,
+                    userName: user[0]?.name,
+                    generations,
+                })
+            );
+        };
+
         getUserId();
     }, []);
+
+   
 
     return (
         <div 
@@ -56,7 +79,6 @@ const Dashboard = () => {
             className="dashboard-container min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-gray-100 py-12 px-4 sm:px-6 lg:px-8"
         >
             <div className="max-w-6xl mx-auto">
-                {/* Header with animated gradient */}
                 <div className="flex justify-between items-center mb-12">
                     <h1 
                         ref={headerRef}
@@ -64,10 +86,8 @@ const Dashboard = () => {
                     >
                         Welcome back, {userName || 'Creator'}
                     </h1>
-                  
                 </div>
 
-                {/* Stats Cards with hover animations */}
                 <div className="grid md:grid-cols-3 gap-6 mb-16">
                     <div 
                         ref={el => { cardsRef.current[0] = el as HTMLDivElement; }}
@@ -105,7 +125,6 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                {/* Recent Generations with animated list */}
                 <div 
                     ref={el => { cardsRef.current[3] = el as HTMLDivElement; }}
                     className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-8 hover:shadow-lg hover:shadow-purple-500/10 transition-all duration-300"
@@ -114,18 +133,15 @@ const Dashboard = () => {
                         <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400">
                             Recent Generations
                         </h2>
-                        <p className="text-xl font-medium">
-                            {}
-                        </p>
-                        <a 
-                            href="/generate" 
+                        <Link 
+                            href="/history" 
                             className="text-sm text-blue-400 hover:text-blue-300 transition-colors duration-200 flex items-center"
                         >
                             <span>View All</span>
                             <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
                             </svg>
-                        </a>
+                        </Link>
                     </div>
 
                     {(recentGenerations ?? []).length > 0 ? (
@@ -169,13 +185,9 @@ const Dashboard = () => {
                         </div>
                     )}
                 </div>
-
-              
             </div>
-
-           
         </div>
-    )
-}
+    );
+};
 
 export default Dashboard;

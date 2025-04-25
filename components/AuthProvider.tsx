@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase';
 import { User } from '@supabase/supabase-js';
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
+import Link from 'next/link';
 
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -37,70 +38,70 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     <div className="min-h-screen bg-gray-900 text-gray-100">
       {/* Glass navbar */}
       <nav className="border-b border-gray-800 py-4 px-6 backdrop-blur-md bg-gray-900/80 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          {/* Logo with gradient */}
-          <a 
-            href="/" 
-            className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500"
+      <div className="max-w-7xl mx-auto flex justify-between items-center">
+        {/* Logo with gradient */}
+        <Link 
+        href="/" 
+        className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500"
+        >
+        AI Content Studio
+        </Link>
+        
+        <div className="flex items-center space-x-2 sm:space-x-4">
+        {user ? (
+          <>
+          <Link 
+            href="/dashboard" 
+            className={`px-3 py-2 rounded-lg transition-colors ${pathname === '/dashboard' ? 'bg-gray-800 text-blue-400' : 'text-gray-300 hover:bg-gray-800'}`}
           >
-            AI Content Studio
-          </a>
-          
-          <div className="flex items-center space-x-2 sm:space-x-4">
-            {user ? (
-              <>
-                <a 
-                  href="/dashboard" 
-                  className={`px-3 py-2 rounded-lg transition-colors ${pathname === '/dashboard' ? 'bg-gray-800 text-blue-400' : 'text-gray-300 hover:bg-gray-800'}`}
-                >
-                  Dashboard
-                </a>
-                <a 
-                  href="/generate" 
-                  className={`px-3 py-2 rounded-lg transition-colors ${pathname === '/generate' ? 'bg-gray-800 text-blue-400' : 'text-gray-300 hover:bg-gray-800'}`}
-                >
-                  Generate
-                </a>
-                <a 
-                  href="/history" 
-                  className={`px-3 py-2 rounded-lg transition-colors ${pathname === '/history' ? 'bg-gray-800 text-blue-400' : 'text-gray-300 hover:bg-gray-800'}`}
-                >
-                  History
-                </a>
-                <a 
-                  href="/account" 
-                  className={`px-3 py-2 rounded-lg transition-colors ${pathname === '/account' ? 'bg-gray-800 text-blue-400' : 'text-gray-300 hover:bg-gray-800'}`}
-                >
-                  Account
-                </a>
-                <button
-                  onClick={async () => {
-                    await createClient().auth.signOut();
-                    window.location.href = '/';
-                  }}
-                  className="px-4 py-2 rounded-lg bg-gradient-to-r from-red-600 to-pink-600 text-white hover:from-red-500 hover:to-pink-500 transition-colors"
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <>
-                <a 
-                  href="/login" 
-                  className={`px-4 py-2 rounded-lg transition-colors ${pathname === '/login' ? 'bg-gray-800 text-blue-400' : 'text-gray-300 hover:bg-gray-800'}`}
-                >
-                  Login
-                </a>
-                <a 
-                  href="/signup" 
-                  className="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-500 hover:to-purple-500 transition-colors"
-                >
-                  Sign Up
-                </a>
-              </>
-            )}
-          </div>
+            Dashboard
+          </Link>
+          <Link 
+            href="/generate" 
+            className={`px-3 py-2 rounded-lg transition-colors ${pathname === '/generate' ? 'bg-gray-800 text-blue-400' : 'text-gray-300 hover:bg-gray-800'}`}
+          >
+            Generate
+          </Link>
+          <Link 
+            href="/history" 
+            className={`px-3 py-2 rounded-lg transition-colors ${pathname === '/history' ? 'bg-gray-800 text-blue-400' : 'text-gray-300 hover:bg-gray-800'}`}
+          >
+            History
+          </Link>
+          <Link 
+            href="/account" 
+            className={`px-3 py-2 rounded-lg transition-colors ${pathname === '/account' ? 'bg-gray-800 text-blue-400' : 'text-gray-300 hover:bg-gray-800'}`}
+          >
+            Account
+          </Link>
+          <button
+            onClick={async () => {
+            await createClient().auth.signOut();
+            window.location.href = '/';
+            }}
+            className="px-4 py-2 rounded-lg bg-gradient-to-r from-red-600 to-pink-600 text-white hover:from-red-500 hover:to-pink-500 transition-colors"
+          >
+            Logout
+          </button>
+          </>
+        ) : (
+          <>
+          <Link 
+            href="/login" 
+            className={`px-4 py-2 rounded-lg transition-colors ${pathname === '/login' ? 'bg-gray-800 text-blue-400' : 'text-gray-300 hover:bg-gray-800'}`}
+          >
+            Login
+          </Link>
+          <Link 
+            href="/signup" 
+            className="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-500 hover:to-purple-500 transition-colors"
+          >
+            Sign Up
+          </Link>
+          </>
+        )}
         </div>
+      </div>
       </nav>
 
       <main className="relative">
