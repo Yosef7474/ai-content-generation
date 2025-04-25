@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import { OpenAI } from 'openai';
+import { OpenAI } from 'openai'; 
 import { createClient } from '@/lib/supabase';
 
 export async function POST(request: Request) {
   const supabase = createClient();
-  
-  // 1. Verify Authentication
+
+
   const authHeader = request.headers.get('Authorization');
   if (!authHeader) {
     return NextResponse.json(
@@ -23,11 +23,9 @@ export async function POST(request: Request) {
       { status: 401 }
     );
   }
-
-  // 2. Process Request
   try {
     const { prompt } = await request.json();
-    
+
     if (!prompt?.trim()) {
       return NextResponse.json(
         { error: 'Prompt is required' },
@@ -35,28 +33,35 @@ export async function POST(request: Request) {
       );
     }
 
-    // 3. Call OpenAI
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error('OPENAI_API_KEY is not set in environment variables');
+    }
+
     const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
+      apiKey: process.env.OPENAI_API_KEY, 
     });
+
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: 'gpt-3.5-turbo',
       messages: [
         {
-          role: "system",
-          content: "You are a helpful AI content generator"
+          role: 'system',
+          content: 'You are a helpful AI content generator',
         },
         {
-          role: "user",
-          content: prompt
-        }
+          role: 'user',
+          content: prompt,
+        },
       ],
-      max_tokens: 500
+      max_tokens: 500,
     });
 
+
+    const content = completion.choices[0]?.message?.content || 'No response content';
+
     return NextResponse.json({
-      content: completion.choices[0]?.message?.content
+      content,
     });
 
   } catch (error) {

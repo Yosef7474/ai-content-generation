@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase';
 
@@ -7,26 +7,26 @@ const CONTENT_TYPES = [
     value: 'blog-post',
     label: 'Blog Post',
     description: 'Long-form articles with structured sections',
-    icon: '✍️'
+    icon: '✍️',
   },
   {
     value: 'social-media',
     label: 'Social Media',
     description: 'Short posts for platforms like Twitter or Instagram',
-    icon: '📱'
+    icon: '📱',
   },
   {
     value: 'product-desc',
     label: 'Product Description',
     description: 'Detailed explanations of product features',
-    icon: '🛍️'
+    icon: '🛍️',
   },
   {
     value: 'email',
     label: 'Email',
     description: 'Professional or marketing emails',
-    icon: '✉️'
-  }
+    icon: '✉️',
+  },
 ];
 
 export default function GeneratePage() {
@@ -40,11 +40,11 @@ export default function GeneratePage() {
   const handleGenerate = async () => {
     setIsLoading(true);
     setError('');
-    
+
     try {
       const supabase = createClient();
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (!session) {
         throw new Error('Please sign in to generate content');
       }
@@ -53,28 +53,28 @@ export default function GeneratePage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
+          'Authorization': `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({ prompt, contentType }),
       });
 
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.error || 'Generation failed');
       }
 
       setOutput(data.content);
 
-      await createClient()
+      await supabase
         .from('generations')
         .insert([{
           user_id: session.user.id,
           prompt,
           content: data.content,
-          content_type: contentType
+          content_type: contentType,
         }]);
-      
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred');
       console.error('Generation error:', err);
@@ -108,7 +108,7 @@ export default function GeneratePage() {
         </h1>
         <p className="text-gray-400">Create high-quality content in seconds</p>
       </div>
-      
+
       <div className="bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-700">
         {/* Content Type Selection */}
         <div className="mb-6">
@@ -118,8 +118,8 @@ export default function GeneratePage() {
               <button
                 key={type.value}
                 onClick={() => setContentType(type.value)}
-                className={`p-4 rounded-lg border transition-all ${contentType === type.value 
-                  ? 'border-blue-500 bg-gray-700 shadow-lg shadow-blue-500/10' 
+                className={`p-4 rounded-lg border transition-all ${contentType === type.value
+                  ? 'border-blue-500 bg-gray-700 shadow-lg shadow-blue-500/10'
                   : 'border-gray-700 hover:border-gray-600 hover:bg-gray-700'}`}
                 disabled={isLoading}
               >
@@ -130,7 +130,7 @@ export default function GeneratePage() {
             ))}
           </div>
         </div>
-        
+
         {/* Prompt Input */}
         <div className="mb-6">
           <div className="flex justify-between items-center mb-3">
@@ -153,11 +153,11 @@ export default function GeneratePage() {
           onClick={handleGenerate}
           disabled={isLoading || !prompt.trim()}
           className={`w-full py-3 px-6 rounded-lg font-medium transition-all ${
-            isLoading 
-              ? 'bg-gray-600 cursor-not-allowed' 
-              : !prompt.trim() 
-                ? 'bg-gray-700 cursor-not-allowed text-gray-500' 
-                : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white shadow-lg hover:shadow-blue-500/30'
+            isLoading
+              ? 'bg-gray-600 cursor-not-allowed'
+              : !prompt.trim()
+              ? 'bg-gray-700 cursor-not-allowed text-gray-500'
+              : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white shadow-lg hover:shadow-blue-500/30'
           }`}
         >
           {isLoading ? (
@@ -186,7 +186,7 @@ export default function GeneratePage() {
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold text-gray-100">Generated Content</h2>
             <div className="flex space-x-2">
-              <button 
+              <button
                 id="copy-btn"
                 onClick={handleCopy}
                 className="flex items-center text-sm bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded transition-colors"
@@ -227,17 +227,11 @@ export default function GeneratePage() {
             </li>
             <li className="flex items-start">
               <span className="text-blue-400 mr-2">•</span>
-              <span>Provide examples: <span className="text-gray-400">"Similar to our previous campaign about sustainability"</span></span>
+              <span>Provide examples: <span className="text-gray-400">"Similar to Apple’s clean design and branding style"</span></span>
             </li>
           </ul>
         </div>
       )}
-
-      {/* Decorative elements */}
-      <div className="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none">
-        <div className="absolute top-20 left-20 w-64 h-64 rounded-full bg-blue-900/10 blur-3xl"></div>
-        <div className="absolute bottom-20 right-20 w-64 h-64 rounded-full bg-purple-900/10 blur-3xl"></div>
-      </div>
     </div>
   );
 }

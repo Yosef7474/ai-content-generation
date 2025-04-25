@@ -8,7 +8,7 @@ import Link from 'next/link';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const CACHE_EXPIRY = 60 * 1000; // 60 seconds
+const CACHE_EXPIRY = 500 * 1000; 
 
 const Dashboard = () => {
     const [userName, setUserName] = useState<string | null>(null);
@@ -25,7 +25,7 @@ const Dashboard = () => {
             const userId = userData?.user?.id;
             if (!userId) return;
 
-            // --- Caching logic ---
+          
             const cacheKey = `dashboard_data_${userId}`;
             const cached = localStorage.getItem(cacheKey);
             const now = Date.now();
@@ -39,7 +39,6 @@ const Dashboard = () => {
                 }
             }
 
-            // Fetch fresh from Supabase
             const { data: user } = await client
                 .from('users')
                 .select('name')
@@ -70,8 +69,7 @@ const Dashboard = () => {
 
         getUserId();
     }, []);
-
-   
+  
 
     return (
         <div 
